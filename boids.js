@@ -49,7 +49,7 @@ var Boid = function(x, y) {
         return swarm.reduce(function(neighbors, boid) {
             var boidPosition = boid.position.clone();
             var distance = boidPosition.sub(thisPosition).magnitude();
-            if (distance <= targetDistance && distance !== 0) {
+            if (distance <= targetDistance && distance !== 0) { //TODO need better way to exclude self
                 neighbors.push(boid);
             }
             return neighbors;
@@ -61,14 +61,14 @@ var Boid = function(x, y) {
         var thisPosition = this.position;
         return neighbors.reduce(function(vec, boid) {
             return vec.add(thisPosition.clone().sub(boid.position));
-        }, new Vector(0, 0)).div(neighbors.length || 1).mult(2);
+        }, new Vector(0, 0)).div(neighbors.length || 1).mult(Variables.separationWeight);
     };
 
     // generate vector of alignment
     this.alignment = function(neighbors) {
         return neighbors.reduce(function(vec, boid) {
             return vec.add(boid.velocity);
-        }, new Vector(0, 0)).div(neighbors.length || 1).mult(10);
+        }, new Vector(0, 0)).div(neighbors.length || 1).mult(Variables.alignmentWeight);
     };
 
     // generate vector of cohesion
@@ -76,7 +76,7 @@ var Boid = function(x, y) {
         var thisPosition = this.position;
         return neighbors.reduce(function(vec, boid) {
             return vec.add(boid.position.clone().sub(thisPosition));
-        }, new Vector(0, 0)).div(neighbors.length || 1);
+        }, new Vector(0, 0)).div(neighbors.length || 1).mult(Variables.cohesionWeight);
     };
 };
 
@@ -159,7 +159,10 @@ var Variables = {
     startingSpeed: 0.75,
     maxSpeed: 0.75,
     detectionSpace: 10,
-    separationSpace: 5
+    separationSpace: 5,
+    separationWeight: 2,
+    alignmentWeight: 10,
+    cohesionWeight: 1
 };
 
 var swarm; //TODO come up with better way to expose swarm to individual boids
