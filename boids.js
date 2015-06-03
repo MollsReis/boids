@@ -1,7 +1,8 @@
 'use strict';
 
 // core boid object
-var Boid = function(x, y) {
+var Boid = function(x, y, id) {
+    this.id = id;
     this.position = new Vector(x, y);
     this.velocity = Util.randomVector(-10, 10).normalize().mult(Variables.startingSpeed);
     this.acceleration = new Vector(0, 0);
@@ -45,11 +46,12 @@ var Boid = function(x, y) {
 
     // get boids within a certain distance (exclude self)
     this.neighbors = function(targetDistance) {
+        var thisId = this.id;
         var thisPosition = this.position;
         return swarm.reduce(function(neighbors, boid) {
             var boidPosition = boid.position.clone();
             var distance = boidPosition.sub(thisPosition).magnitude();
-            if (distance <= targetDistance && distance !== 0) { //TODO need better way to exclude self
+            if (distance <= targetDistance && thisId !== boid.id) {
                 neighbors.push(boid);
             }
             return neighbors;
@@ -147,7 +149,7 @@ var Util = {
         var swarm = [];
         for (i = 0; i < num; i++) {
             point = Util.randomPoint();
-            swarm.push(new Boid(point[0], point[1]))
+            swarm.push(new Boid(point[0], point[1], i))
         }
         return swarm;
     }
@@ -160,7 +162,7 @@ var Variables = {
     maxSpeed: 0.75,
     detectionSpace: 10,
     separationSpace: 5,
-    separationWeight: 2,
+    separationWeight: 3,
     alignmentWeight: 10,
     cohesionWeight: 1
 };
