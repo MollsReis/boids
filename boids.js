@@ -15,6 +15,8 @@ var Boid = function(x, y) {
 
     // boid position update
     this.update = function() {
+        var canvasWidth, canvasHeight;
+
         // reset acceleration
         this.acceleration.mult(0);
 
@@ -33,13 +35,17 @@ var Boid = function(x, y) {
 
         // adjust position
         this.position.add(this.velocity);
+
+        // adjust off-screen positions
+        canvasWidth = Util.getCanvas().width;
+        canvasHeight = Util.getCanvas().height;
+        this.position.x = (this.position.x < 0 ? this.position.x + canvasWidth : this.position.x) % canvasWidth;
+        this.position.y = (this.position.y < 0 ? this.position.y + canvasHeight : this.position.y) % canvasHeight;
     };
 
     // render boid on canvas
     this.render = function(context) {
-        var x = this.position.x % context.canvas.width,
-            y = this.position.y % context.canvas.height;
-        context.fillRect(x, y, 1, 1);
+        context.fillRect(this.position.x, this.position.y, 1, 1);
     };
 
     function separation() {
