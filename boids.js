@@ -2,15 +2,8 @@
 
 // core boid object
 var Boid = function(x, y) {
-    // tweakables
-    this.startingSpeed = 1;
-    this.maxSpeed = 10;
-    this.minDistance = 3;
-    this.maxDistance = 10;
-
-    // boid vectors
     this.position = new Vector(x, y);
-    this.velocity = Util.randomVector(-10, 10).normalize().mult(this.startingSpeed);
+    this.velocity = Util.randomVector(-10, 10).normalize().mult(Variables.startingSpeed);
     this.acceleration = new Vector(0, 0);
 
     // boid position update
@@ -29,8 +22,8 @@ var Boid = function(x, y) {
         this.velocity.add(this.acceleration);
 
         // check for max speed
-        if (this.velocity.magnitude() > this.maxSpeed) {
-            this.velocity.normalize().mult(this.maxSpeed);
+        if (this.velocity.magnitude() > Variables.maxSpeed) {
+            this.velocity.normalize().mult(Variables.maxSpeed);
         }
 
         // adjust position
@@ -133,13 +126,22 @@ var Util = {
     }
 };
 
+var Variables = {
+    fps: 60,
+    swarmSize: 100,
+    startingSpeed: 1,
+    maxSpeed: 10,
+    detectionSpace: 10,
+    separationSpace: 3
+};
+
 var init = function() {
     // grab canvas/context
     var canvas = Util.getCanvas();
     var context = canvas.getContext('2d');
 
     // create swarm
-    var boids = Util.generateSwarm(100);
+    var boids = Util.generateSwarm(Variables.swarmSize);
 
     // loop forever
     var loop = setInterval(function() {
@@ -151,5 +153,5 @@ var init = function() {
 
         // update boid position
         boids.forEach(function(boid) { boid.update(); });
-    }, 10);
+    }, 1000 / Variables.fps);
 };
