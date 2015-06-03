@@ -8,15 +8,17 @@ var Boid = function(x, y) {
 
     // boid position update
     this.update = function() {
-        var canvasWidth, canvasHeight;
+        var canvasWidth, canvasHeight, closeNeighbors, neighbors;
 
         // reset acceleration
         this.acceleration.mult(0);
 
         // calculate forces
-        this.acceleration.add(separation());
-        this.acceleration.add(alignment());
-        this.acceleration.add(cohesion());
+        closeNeighbors = this.neighbors(Variables.separationSpace);
+        neighbors = this.neighbors(Variables.detectionSpace);
+        this.acceleration.add(this.separation(closeNeighbors));
+        this.acceleration.add(this.alignment(neighbors));
+        this.acceleration.add(this.cohesion(neighbors));
 
         // adjust velocity
         this.velocity.add(this.acceleration);
@@ -41,31 +43,41 @@ var Boid = function(x, y) {
         context.fillRect(this.position.x, this.position.y, 1, 1);
     };
 
-    this.neighbors = function() { //TODO memoize this with ability to clear memoized value
+    // get boids within a certain distance (exclude self)
+    this.neighbors = function(targetDistance) {
         var thisPosition = this.position;
         return swarm.reduce(function(neighbors, boid) {
             var boidPosition = boid.position.clone();
-            if (boidPosition.sub(thisPosition).magnitude() <= Variables.detectionSpace) {
+            var distance = boidPosition.sub(thisPosition).magnitude();
+            if (distance <= targetDistance && distance !== 0) {
                 neighbors.push(boid);
             }
             return neighbors;
         }, []);
     };
 
-    function separation() {
-        //TODO
-        return new Vector(0, 0);
-    }
+    // generate vector of separation
+    this.separation = function(neighbors) {
+        var thisPosition = this.position;
+        return neighbors.reduce(function(vec, boid) {
+            return vec.add(thisPosition.clone().sub(boid.position));
+        }, new Vector(0, 0)).div(neighbors.length || 1).mult(2);
+    };
 
-    function alignment() {
-        //TODO
-        return new Vector(0, 0);
-    }
+    // generate vector of alignment
+    this.alignment = function(neighbors) {
+        return neighbors.reduce(function(vec, boid) {
+            return vec.add(boid.velocity);
+        }, new Vector(0, 0)).div(neighbors.length || 1).mult(10);
+    };
 
-    function cohesion() {
-        //TODO
-        return new Vector(0, 0);
-    }
+    // generate vector of cohesion
+    this.cohesion = function(neighbors) {
+        var thisPosition = this.position;
+        return neighbors.reduce(function(vec, boid) {
+            return vec.add(boid.position.clone().sub(thisPosition));
+        }, new Vector(0, 0)).div(neighbors.length || 1);
+    };
 };
 
 // basic vector object
@@ -143,11 +155,11 @@ var Util = {
 
 var Variables = {
     fps: 60,
-    swarmSize: 100,
-    startingSpeed: 1,
-    maxSpeed: 10,
+    swarmSize: 50,
+    startingSpeed: 0.75,
+    maxSpeed: 0.75,
     detectionSpace: 10,
-    separationSpace: 3
+    separationSpace: 5
 };
 
 var swarm; //TODO come up with better way to expose swarm to individual boids
