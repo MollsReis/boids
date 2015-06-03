@@ -41,6 +41,17 @@ var Boid = function(x, y) {
         context.fillRect(this.position.x, this.position.y, 1, 1);
     };
 
+    this.neighbors = function() { //TODO memoize this with ability to clear memoized value
+        var thisPosition = this.position;
+        return swarm.reduce(function(neighbors, boid) {
+            var boidPosition = boid.position.clone();
+            if (boidPosition.sub(thisPosition).magnitude() <= Variables.detectionSpace) {
+                neighbors.push(boid);
+            }
+            return neighbors;
+        }, []);
+    };
+
     function separation() {
         //TODO
         return new Vector(0, 0);
@@ -94,6 +105,10 @@ var Vector = function(x, y) {
         this.div(this.magnitude());
         return this;
     };
+
+    this.clone = function() {
+        return new Vector(this.x, this.y);
+    };
 };
 
 // helper functions
@@ -135,13 +150,15 @@ var Variables = {
     separationSpace: 3
 };
 
+var swarm; //TODO come up with better way to expose swarm to individual boids
+
 var init = function() {
     // grab canvas/context
     var canvas = Util.getCanvas();
     var context = canvas.getContext('2d');
 
     // create swarm
-    var boids = Util.generateSwarm(Variables.swarmSize);
+    swarm = Util.generateSwarm(Variables.swarmSize);
 
     // loop forever
     var loop = setInterval(function() {
@@ -149,9 +166,9 @@ var init = function() {
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         // render boids
-        boids.forEach(function(boid) { boid.render(context); });
+        swarm.forEach(function(boid) { boid.render(context); });
 
         // update boid position
-        boids.forEach(function(boid) { boid.update(); });
+        swarm.forEach(function(boid) { boid.update(); });
     }, 1000 / Variables.fps);
 };
