@@ -41,7 +41,7 @@ var Boid = function(x, y, id) {
 
     // render boid on canvas
     this.render = function(context) {
-        context.fillRect(this.position.x, this.position.y, 1, 1);
+        context.fillRect(this.position.x, this.position.y, Variables.boidSize, Variables.boidSize);
     };
 
     // get boids within a certain distance (exclude self)
@@ -157,12 +157,13 @@ var Util = {
 
 var Variables = {
     fps: 60,
-    swarmSize: 50,
-    startingSpeed: 0.75,
-    maxSpeed: 0.75,
-    detectionSpace: 10,
-    separationSpace: 5,
-    separationWeight: 3,
+    boidSize: 3,
+    swarmSize: 75,
+    startingSpeed: 1.5,
+    maxSpeed: 2,
+    detectionSpace: 30,
+    separationSpace: 10,
+    separationWeight: 5,
     alignmentWeight: 10,
     cohesionWeight: 1
 };
