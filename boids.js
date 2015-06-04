@@ -7,9 +7,9 @@ var Boid = function(x, y, id) {
     this.velocity = Util.randomVector(-10, 10).normalize().mult(Variables.startingSpeed);
     this.acceleration = new Vector(0, 0);
 
-    // boid position update
-    this.update = function() {
-        var canvasWidth, canvasHeight, closeNeighbors, neighbors;
+    // update boid acceleration
+    this.updateAcceleration = function() {
+        var closeNeighbors, neighbors;
 
         // reset acceleration
         this.acceleration.mult(0);
@@ -20,6 +20,11 @@ var Boid = function(x, y, id) {
         this.acceleration.add(this.separation(closeNeighbors));
         this.acceleration.add(this.alignment(neighbors));
         this.acceleration.add(this.cohesion(neighbors));
+    };
+
+    // update boid velocity and position
+    this.updatePosition = function() {
+        var canvasWidth, canvasHeight;
 
         // adjust velocity
         this.velocity.add(this.acceleration);
@@ -162,10 +167,10 @@ var Variables = {
     boidSize: 3,
     swarmSize: 100,
     startingSpeed: 1.5,
-    maxSpeed: 2,
-    detectionSpace: 30,
-    separationSpace: 10,
-    separationWeight: 5,
+    maxSpeed: 3,
+    detectionSpace: 50,
+    separationSpace: 5,
+    separationWeight: 10,
     alignmentWeight: 10,
     cohesionWeight: 1
 };
@@ -188,7 +193,10 @@ var init = function() {
         // render boids
         swarm.forEach(function(boid) { boid.render(context); });
 
+        // update boid acceleration
+        swarm.forEach(function(boid) { boid.updateAcceleration(); });
+
         // update boid position
-        swarm.forEach(function(boid) { boid.update(); });
+        swarm.forEach(function(boid) { boid.updatePosition(); });
     }, 1000 / Variables.fps);
 };
