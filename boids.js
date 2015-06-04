@@ -15,11 +15,12 @@ var Boid = function(x, y, id) {
         this.acceleration.mult(0);
 
         // calculate forces
-        closeNeighbors = this.neighbors(Variables.separationSpace);
+        closeNeighbors = this.neighbors(Variables.separationSpace + Variables.boidSize);
         neighbors = this.neighbors(Variables.detectionSpace);
         this.acceleration.add(this.separation(closeNeighbors));
         this.acceleration.add(this.alignment(neighbors));
         this.acceleration.add(this.cohesion(neighbors));
+        this.acceleration.add(this.avoidance());
     };
 
     // update boid velocity and position
@@ -37,11 +38,7 @@ var Boid = function(x, y, id) {
         // adjust position
         this.position.add(this.velocity);
 
-        // adjust off-screen positions
-        canvasWidth = Util.getCanvas().width;
-        canvasHeight = Util.getCanvas().height;
-        this.position.x = (this.position.x < 0 ? this.position.x + canvasWidth : this.position.x) % canvasWidth;
-        this.position.y = (this.position.y < 0 ? this.position.y + canvasHeight : this.position.y) % canvasHeight;
+        //TODO hard stop on edge of canvas
     };
 
     // render boid on canvas
@@ -87,6 +84,28 @@ var Boid = function(x, y, id) {
             return vec.add(boid.position.clone().sub(thisPosition));
         }, new Vector(0, 0)).div(neighbors.length || 1).mult(Variables.cohesionWeight);
     };
+
+    // generate vector of avoidance
+    //TODO refactor for brevity
+    this.avoidance = function() {
+        var xForce = 0,
+            yForce = 0;
+
+        if (this.position.x < Variables.avoidanceDWeight) {
+            xForce = Variables.avoidanceDWeight - this.position.x;
+        } else if ((Util.getCanvas().width - this.position.x) < Variables.avoidanceDWeight) {
+            xForce = -1 * (Variables.avoidanceDWeight - (Util.getCanvas().width - this.position.x));
+        }
+
+        if (this.position.y < Variables.avoidanceDWeight) {
+            yForce = Variables.avoidanceDWeight - this.position.y;
+        } else if ((Util.getCanvas().height - this.position.y) < Variables.avoidanceDWeight) {
+            yForce = -1 * (Variables.avoidanceDWeight - (Util.getCanvas().height - this.position.y));
+        }
+
+        //return new Vector(Math.pow(xForce, 2), Math.pow(yForce, 2));
+        return new Vector(xForce, yForce);
+    }
 };
 
 // basic vector object
@@ -169,10 +188,11 @@ var Variables = {
     startingSpeed: 1.5,
     maxSpeed: 3,
     detectionSpace: 50,
-    separationSpace: 5,
+    separationSpace: 2,
     separationWeight: 10,
     alignmentWeight: 10,
-    cohesionWeight: 1
+    cohesionWeight: 1,
+    avoidanceDWeight: 20
 };
 
 var swarm; //TODO come up with better way to expose swarm to individual boids
