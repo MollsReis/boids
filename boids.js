@@ -38,7 +38,19 @@ var Boid = function(x, y, id) {
         // adjust position
         this.position.add(this.velocity);
 
-        //TODO hard stop on edge of canvas
+        // hard stop on edges of canvas
+        if (this.position.x < 0) {
+            this.position.x = 1;
+        } else if (this.position.x > Util.getCanvas().width) {
+            this.position.x = Util.getCanvas().width - 1;
+        }
+
+        if (this.position.y < 0) {
+            this.position.y = 1;
+        } else if (this.position.y > Util.getCanvas().height) {
+            this.position.y = Util.getCanvas().height - 1;
+        }
+
     };
 
     // render boid on canvas
