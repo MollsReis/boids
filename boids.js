@@ -50,8 +50,10 @@ var Boid = function(x, y, id) {
         var thisPosition = this.position;
         return swarm.reduce(function(neighbors, boid) {
             var boidPosition = boid.position.clone();
-            var distance = boidPosition.sub(thisPosition).magnitude();
-            if (distance <= targetDistance && thisId !== boid.id) {
+            if (Math.abs(thisPosition.x - boidPosition.x) <= targetDistance &&
+                Math.abs(thisPosition.y - boidPosition.y) <= targetDistance &&
+                boidPosition.sub(thisPosition).magnitude() <= targetDistance
+                && thisId !== boid.id) {
                 neighbors.push(boid);
             }
             return neighbors;
@@ -158,7 +160,7 @@ var Util = {
 var Variables = {
     fps: 60,
     boidSize: 3,
-    swarmSize: 75,
+    swarmSize: 100,
     startingSpeed: 1.5,
     maxSpeed: 2,
     detectionSpace: 30,
